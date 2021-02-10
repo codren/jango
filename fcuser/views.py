@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Fcuser
 from django.http import HttpResponse    # 프론트엔드에서 사용자에게 보여줄 응답
 from django.contrib.auth.hashers import make_password, check_password   # 비밀번호 해쉬화
+from .forms import LoginForm
 
 # Create your views here.
 # Backend Section
@@ -9,14 +10,16 @@ from django.contrib.auth.hashers import make_password, check_password   # 비밀
 
 # 홈
 def home(request):
-
+    request.session['guest'] = 'guest'
     user_id = request.session.get('user')
 
     if user_id:
         fcuser = Fcuser.objects.get(pk=user_id)
+        # print(request.session.__dict__)
         return HttpResponse(fcuser.username)
 
-    return HttpResponse('Home!')
+    # print(request.session.__dict__)
+    return HttpResponse(request.session['guest'])
 
 
 # 회원가입
@@ -69,25 +72,52 @@ def register(request):
         return render(request, 'register.html', res_data)
 
 
-# 로그인
-def login(request):
-    # 로그인화면 요청
-    if request.method == 'GET':
-        return render(request, 'login.html')
-    # 로그인 입력 후
-    elif request.method == 'POST':
-        res_data = {}
-        username = request.POST['username']
-        password = request.POST['password']
-        if not (username and password):
-            res_data['error'] = '모든 항목을 입력하세요.'
-        # select SQL문인듯 Fcuser 객체로 만들어진 objects들(row들)에서 select=get (where문)
-        else:
-            fcuser = Fcuser.objects.get(username=username)
-            if check_password(password, fcuser.password):
-                request.session['user'] = fcuser.id
-                return redirect('/')
-            else:
-                res_data['error'] = '비밀번호가 일치하지 않습니다.'
+# 로그인 fomrs 사용전
+# def login(request):
+#     # 로그인화면 요청
+#     if request.method == 'GET':
+#         return render(request, 'login.html')
+#     # 로그인 입력 후
+#     elif request.method == 'POST':
+#         res_data = {}
+#         username = request.POST['username']
+#         password = request.POST['password']
+#         if not (username and password):
+#             res_data['error'] = '모든 항목을 입력하세요.'
+#         # select SQL문인듯 Fcuser 객체로 만들어진 objects들(row들)에서 select=get (where문)
+#         else:
+#             fcuser = Fcuser.objects.get(username=username)
+#             if check_password(password, fcuser.password):
+#                 request.session['user'] = fcuser.id
+#                 return redirect('/')
+#             else:
+#                 res_data['error'] = '비밀번호가 일치하지 않습니다.'
 
-        return render(request, 'login.html', res_data)
+#         return render(request, 'login.html', res_data)
+
+
+# 로그인 forms 사용
+
+def login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            # request(요청)에 담긴 POST내용에서 오류가 있다면 아래 return으로 넘어감/// 그리고 처음에 없어도 될거라고 생각함.
+            # 왜냐면 이미 form에서 있냐 없냐를 체크해 주기도하고 그냥 form.user_id 이 참이면 있는거고 없으면 틀리거나 없는건데
+            # 여기서 문제는 비밀번호가 틀린경우 그리고 아예 2개의 항목을 모두 채우지않은 경우를 구별할 수가 없고 또한
+            # 틀렸을 경우에 error 메시지를 변경해주기 위해서도 이걸 사용함. 조건문이용을위해
+            request.session['user'] = form.user_id  # 없다면 세션을 어차피 만들지 않음
+            return redirect('/')
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
+
+    # 로그아웃
+
+
+def logout(request):
+    if request.session.get('user'):
+        del(request.session['user'])
+
+    return redirect('/')
