@@ -20,6 +20,7 @@ from fcuser.views import home
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('fcuser/', include('fcuser.urls')),
-    # from ~~ import ~~ 이런식으로 하려면 정확한 주소를 알려주어야함 path('fcuser/', fcuser.urls)
+    # from ~~ import ~~ 이런식으로 하려면 정확한 주소를 알려주어야함 path('fcuser/', fcuser.urls)  !!!!!!!!! 정확하게 줘도 안됨 그냥 include 고정인듯
+    path('board/', include('board.urls')),
     path('', home),
 ]

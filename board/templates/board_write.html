@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block contents %}
+<div class="row mt-5">
+    <div class="col-12">
+        <form method="POST" action='.'>
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label}}">{{ field.label}}</label>
+                    {% ifequal field.name 'contents' %}
+                    <!-- textarea는 input type에 없고 따로 만들어줘야함 -->
+                    <textarea style="height: 170px;" class="form-control" name="{{ field.name }}" id=" field.id_for_label" placeholder="{{ field.label }}" ></textarea>
+                    <!-- 위에 style로 직접 하나하나 고치는것도 가능함 이용 잘하자 -->
+                    {% else %}
+                    <input type="{{ field.field.widget.input_type}}" class="form-control" id="{{ field.id_for_label}}" 
+                    placeholder="{{ field.label}}" name="{{field.name}}" />
+                    {% endifequal %}
+                </div>
+            {% if field.errors %}
+            <!-- <span style="color: red; list-style-type: none;">{{field.errors}}</span> -->
+            <span style="color:red">{{field.errors}}</span>
+            {% endif %}
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">글쓰기</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
