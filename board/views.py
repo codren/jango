@@ -3,13 +3,19 @@ from .models import Board
 from fcuser.models import Fcuser
 from .forms import BoardForm
 from django.http import Http404
+from django.core.paginator import Paginator
 
 # Create your views here.
 
 
 # 게시글 목록
 def board_list(request):
-    boards = Board.objects.all().order_by('-id')    # - 역순 의미
+    all_boards = Board.objects.all().order_by('-id')    # - 역순 의미
+    # 조회해온 모든 행들을 2개씩 페이징하겠다. /?p = 값 해서 알아서 템플릿을 만드는 느낌같음. url parse도 하고.
+    paginator = Paginator(all_boards, 2)
+    # GET 요청 Request url에 있는 ?p 변수에 있는 값을 가져오겠다 , 만약 없다면 기본 값은 1로 하겠다.
+    page = int(request.GET.get('p', 1))
+    boards = paginator.get_page(page)       # p안에 있는 p번째 페이지의 항목들(행들)을 넘기겠다.
     return render(request, 'board_list.html', {'boards': boards})
 
 
