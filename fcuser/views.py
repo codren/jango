@@ -10,16 +10,8 @@ from .forms import LoginForm
 
 # 홈
 def home(request):
-    request.session['guest'] = 'guest'
-    user_id = request.session.get('user')
 
-    if user_id:
-        fcuser = Fcuser.objects.get(pk=user_id)
-        # print(request.session.__dict__)
-        return HttpResponse(fcuser.username)
-
-    # print(request.session.__dict__)
-    return HttpResponse(request.session['guest'])
+    return render(request, 'home.html')
 
 
 # 회원가입
