@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth.hashers import check_password
 
 
 class BoardForm(forms.Form):    # forms.Form 상속받음
@@ -15,3 +14,6 @@ class BoardForm(forms.Form):    # forms.Form 상속받음
             'required': '내용을 입력해주세요'
         }, widget=forms.Textarea,  label="내용")    # widget에는 TextField 없음 Textarea 존재
     # widget=forms.Textarea 없어도 되는듯 어차피 이미 템플릿에서 textarea로 해줫기 때문에
+
+    # required=False null값 허용해서 에러로 간주하지 않음
+    tags = forms.CharField(required=False, label="태그")

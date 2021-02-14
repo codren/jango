@@ -4,6 +4,7 @@ from fcuser.models import Fcuser
 from .forms import BoardForm
 from django.http import Http404
 from django.core.paginator import Paginator
+from tag.models import Tag
 
 # Create your views here.
 
@@ -36,6 +37,20 @@ def board_write(request):
             board.writer = fcuser
             board.save()
 
+            # tags 에서 여러값이 , 로 들어올 수 있기때문에 나눈다음 리스트로 반환
+            tags = form.cleaned_data['tags'].split(',')
+            for tag in tags:
+                if not tag:
+                    continue
+
+                # _tag 자리는 객체 created 는 새로만든건지 원래있던거지 여부를 가져다줌
+                # _tag, created = Tag.objects.get_or_create(name=tag)
+
+                # _ 는 다중 값 반환할 때 사용하지 않겠다 라는 의미
+                _tag, _ = Tag.objects.get_or_create(name=tag)
+                # 중요 !! board_tag 테이블에 항목을 넣기 위해서는 board와 tag 테이블에 먼저 만들어져야 하므로 위에서 board.save()로 만들고 바로 위애서 create하거나 원래 존재했던거임
+                board.tags.add(_tag)
+
             return redirect('/board/list')
     else:
         form = BoardForm()
@@ -51,5 +66,6 @@ def board_detail(request, pk):
         board = Board.objects.get(pk=pk)
     except Board.DoesNotExist:
         raise Http404('게시글을 찾을 수 없습니다.')
-
+    # print(str(board.tags.last))      ~~인스턴스를 가리키는 함수
+    # print(str(board.tags.last()))    그 인스턴스 자체
     return render(request, 'board_detail.html', {'board': board})

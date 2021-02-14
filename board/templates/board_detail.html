@@ -3,14 +3,26 @@
 {% block contents %}
 <div class="row mt-5">
     <div class="col-12">
-                <div class="form-group">
-                    <label for="title">제목</label>
-                    <input type="text" class="form-control" id="title"  value="{{ board.title }}" readonly />
-                    <label for="contents">내용</label>
-                    <textarea  class="form-control"  id="contents" readonly>{{ board.contents }}</textarea>
-                    <!--  textarea value = "" 안에 값을 넣으면 출력이 되지 않았음.  -->
-                </div>
-            <button class="btn btn-primary" onclick="location.href='/board/list/'">돌아가기</button> <!--type = submit을 하면 폼 태그의 내용을 내보냄-->
+        <div class="form-group">
+            <label for="title">제목</label>
+            <input type="text" class="form-control" id="title"  value="{{ board.title }}" readonly />
+            <label for="contents">내용</label>
+            <textarea  class="form-control"  id="contents" readonly>{{ board.contents }}</textarea>
+            <!--  textarea value = "" 안에 값을 넣으면 출력이 되지 않았음.  -->
+            <label for="tags">태그</label>
+            <span id="tags" class="form-control">
+                <!-- {{ board.tags.all|join:", "}} 이것도 가능 list형식인듯 /// {{ board.tags.all}} 만 하면 그 리스트 자체를 보여주는거고 join을 하면 그 값 사이사이에 저걸 넣고 출력하겟다는의미-->
+                {% for tag in board.tags.all %}     <!--board.tag는 n:m 관계이므로 원자값이 아닌 여러 다중값이 들어가있음 따라서 board_tag 테이블이 존재함 board에서 추출한 행과 일치하는 행을 찾고 그걸 또 tag로 넘어가서-->
+                {% ifequal tag board.tags.last %}
+                {{ tag.name}}                    <!--tag행을 찾고 그 각 행들의 tag.name 필드를 추출해야함.   booard.tag는 바로 불가능함(애초에 테이블 구조가 직접 조회할 수 없음)-->
+                <!-- {{ tag }}도 가능 왜냐면 그 인스턴스(행)을 str로 출력하면 지정한__str__ 값으로 출력됨-->                    
+                {% else %}
+                {{ tag.name }},
+                {% endifequal%}
+                {% endfor %}
+            </span>
+        </div>
+        <button class="btn btn-primary" onclick="location.href='/board/list/'">돌아가기</button> <!--type = submit을 하면 폼 태그의 내용을 내보냄-->
     </div>
 </div>
 {% endblock %}
